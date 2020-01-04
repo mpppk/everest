@@ -33,8 +33,9 @@ func newCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
 }
 
 type CmdRawConfig struct {
-	SumCmdConfig `mapstructure:",squash"`
-	Toggle       bool
+	SumCmdConfig   `mapstructure:",squash"`
+	ServeCmdConfig `mapstructure:",squash"`
+	Toggle         bool
 }
 
 func (c *CmdRawConfig) validate() error {

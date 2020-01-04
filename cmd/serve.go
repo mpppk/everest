@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/mpppk/everest/internal/option"
+
 	"github.com/spf13/afero"
 
 	"github.com/spf13/cobra"
@@ -12,11 +14,30 @@ func newServeCmd(fs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve static files",
+		Args:  cobra.ExactArgs(1),
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			http.Handle("/", http.FileServer(http.Dir(".")))
-			return http.ListenAndServe(":3000", nil)
+			conf, err := option.NewServeCmdConfigFromViper()
+			if err != nil {
+				return err
+			}
+			rootPath := args[0]
+			cmd.Println("Files are served on http://localhost:" + conf.Port)
+			http.Handle("/", http.FileServer(http.Dir(rootPath)))
+			return http.ListenAndServe(":"+conf.Port, nil)
 		},
+	}
+	newPortFlag := func() *option.StringFlag {
+		return &option.StringFlag{
+			Flag: &option.Flag{
+				Name:  "port",
+				Usage: "port",
+			},
+			Value: "3000",
+		}
+	}
+	if err := option.RegisterStringFlag(cmd, newPortFlag()); err != nil {
+		return nil, err
 	}
 	return cmd, nil
 }

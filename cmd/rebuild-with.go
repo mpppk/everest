@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -21,16 +20,23 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "rebuild-with",
 		Short: "rebuild everest",
-		//Args:  cobra.ExactArgs(1),
-		Long: ``,
+		Args:  cobra.ExactArgs(1),
+		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			statikFs, err := fs.New()
+			embeddedPath := args[0]
+			embeddedPkgName := "embedded"
+
+			selfFs, err := fs.New()
 			if err != nil {
-				fmt.Println("err1")
 				return err
 			}
+
+			if err := exec.Command("statik", "-src", embeddedPath, "-p", embeddedPkgName).Run(); err != nil {
+				return err
+			}
+
 			dstPath := os.TempDir()
-			if err := writeFs(statikFs, dstPath); err != nil {
+			if err := writeFs(selfFs, dstPath); err != nil {
 				return err
 			}
 			mainPath := filepath.Join(dstPath, "main.go")

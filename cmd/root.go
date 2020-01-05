@@ -2,49 +2,52 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
+	"github.com/rakyll/statik/fs"
+
+	_ "github.com/mpppk/everest/embedded"
 	"github.com/mpppk/everest/internal/option"
 	"github.com/spf13/afero"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
-func newToggleFlag() *option.BoolFlag {
-	return &option.BoolFlag{
-		Flag: &option.Flag{
-			Name:  "toggle",
-			Usage: "Do nothing",
-		},
-		Value: false,
-	}
-}
-
-func NewRootCmd(fs afero.Fs) (*cobra.Command, error) {
+func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "everest",
 		Short: "everest",
-	}
-
-	configFlag := &option.StringFlag{
-		Flag: &option.Flag{
-			Name:         "config",
-			IsPersistent: true,
-			Usage:        "config file (default is $HOME/.everest.yaml)",
+		RunE: func(cmd *cobra.Command, rags []string) error {
+			embeddedFs, err := fs.New()
+			if err != nil {
+				return err
+			}
+			http.Handle("/", http.FileServer(embeddedFs))
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 
-	if err := option.RegisterStringFlag(cmd, configFlag); err != nil {
+	newPortFlag := func() *option.StringFlag {
+		return &option.StringFlag{
+			Flag: &option.Flag{
+				Name:  "port",
+				Usage: "port",
+			},
+			Value: "3000",
+		}
+	}
+	if err := option.RegisterStringFlag(cmd, newPortFlag()); err != nil {
 		return nil, err
 	}
 
 	var subCmds []*cobra.Command
 	for _, cmdGen := range cmdGenerators {
-		subCmd, err := cmdGen(fs)
+		subCmd, err := cmdGen(aferoFs)
 		if err != nil {
 			return nil, err
 		}
@@ -74,22 +77,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".everest" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".everest")
-	}
-
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

@@ -1,4 +1,8 @@
-# everest
+<div align="center">
+<img src="https://raw.github.com/wiki/mpppk/everest/images/logo.png" title="logo">
+
+</div>
+
 everest is the static file server with no runtime.
 
 everest also has the `rebuild-with` command to import the specified files into the binary.
@@ -32,3 +36,7 @@ $ everest rebuild-with path/to/files
 $ everest # if you execute everest with no arguments, imported files are served.
 Embedded files are served on http://localhost:3000
 ```
+
+## Credits
+
+<div>Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

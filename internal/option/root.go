@@ -6,7 +6,7 @@ import (
 )
 
 type CmdConfig struct {
-	Toggle bool
+	Port string
 }
 
 func NewRootCmdConfigFromViper() (*CmdConfig, error) {
@@ -28,19 +28,15 @@ func newCmdRawConfig() (*CmdRawConfig, error) {
 
 func newCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
 	return &CmdConfig{
-		Toggle: rawConfig.Toggle,
+		Port: rawConfig.Port,
 	}
 }
 
 type CmdRawConfig struct {
-	SumCmdConfig   `mapstructure:",squash"`
-	ServeCmdConfig `mapstructure:",squash"`
-	Toggle         bool
+	SumCmdConfig `mapstructure:",squash"`
+	CmdConfig    `mapstructure:",squash"`
 }
 
 func (c *CmdRawConfig) validate() error {
-	if err := c.SumCmdConfig.validate(); err != nil {
-		return xerrors.Errorf("invalid config parameter is given to SumCmdConfig: %w", err)
-	}
 	return nil
 }

@@ -27,18 +27,6 @@ func newServeCmd(fs afero.Fs) (*cobra.Command, error) {
 			return http.ListenAndServe(":"+conf.Port, nil)
 		},
 	}
-	newPortFlag := func() *option.StringFlag {
-		return &option.StringFlag{
-			Flag: &option.Flag{
-				Name:  "port",
-				Usage: "port",
-			},
-			Value: "3000",
-		}
-	}
-	if err := option.RegisterStringFlag(cmd, newPortFlag()); err != nil {
-		return nil, err
-	}
 	return cmd, nil
 }
 

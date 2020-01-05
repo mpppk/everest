@@ -20,12 +20,17 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 		Use:   "everest",
 		Short: "everest",
 		RunE: func(cmd *cobra.Command, rags []string) error {
+			conf, err := option.NewRootCmdConfigFromViper()
+			if err != nil {
+				return err
+			}
 			embeddedFs, err := fs.New()
 			if err != nil {
 				return err
 			}
+			cmd.Println("Embedded files are served on http://localhost:" + conf.Port)
 			http.Handle("/", http.FileServer(embeddedFs))
-			if err := http.ListenAndServe(":3000", nil); err != nil {
+			if err := http.ListenAndServe(":"+conf.Port, nil); err != nil {
 				return err
 			}
 			return nil
@@ -35,8 +40,9 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	newPortFlag := func() *option.StringFlag {
 		return &option.StringFlag{
 			Flag: &option.Flag{
-				Name:  "port",
-				Usage: "port",
+				Name:         "port",
+				Usage:        "port",
+				IsPersistent: true,
 			},
 			Value: "3000",
 		}

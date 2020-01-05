@@ -1,11 +1,9 @@
 package option
 
-// ServeCmdConfig is config for sum command
 type ServeCmdConfig struct {
 	Port string
 }
 
-// NewServeCmdConfigFromViper generate config for sum command from viper
 func NewServeCmdConfigFromViper() (*ServeCmdConfig, error) {
 	rawConfig, err := newCmdRawConfig()
 	return newServeCmdConfigFromRawConfig(rawConfig), err

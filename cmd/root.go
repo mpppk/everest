@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
+
+	"github.com/mpppk/everest/serve"
 
 	"github.com/rakyll/statik/fs"
 
@@ -19,21 +20,25 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "everest",
 		Short: "everest",
-		RunE: func(cmd *cobra.Command, rags []string) error {
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 			conf, err := option.NewRootCmdConfigFromViper()
 			if err != nil {
 				return err
 			}
-			embeddedFs, err := fs.New()
-			if err != nil {
-				return err
+
+			if len(args) == 0 {
+				embeddedFs, err := fs.New()
+				if err != nil {
+					return err
+				}
+				cmd.Println("Embedded files are served on http://localhost:" + conf.Port)
+				return serve.FileSystem(embeddedFs, conf.Port)
 			}
-			cmd.Println("Embedded files are served on http://localhost:" + conf.Port)
-			http.Handle("/", http.FileServer(embeddedFs))
-			if err := http.ListenAndServe(":"+conf.Port, nil); err != nil {
-				return err
-			}
-			return nil
+
+			rootPath := args[0]
+			cmd.Println("Files are served on http://localhost:" + conf.Port)
+			return serve.Files(rootPath, conf.Port)
 		},
 	}
 

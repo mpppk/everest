@@ -1,15 +1,15 @@
 SHELL = /bin/bash
 
 .PHONY: lint
-lint:
+lint: generate
 	go vet ./...
 
 .PHONY: test
-test:
+test: generate
 	go test ./...
 
 .PHONY: integration-test
-integration-test: deps
+integration-test:
 	go test -tags=integration ./...
 
 .PHONY: coverage

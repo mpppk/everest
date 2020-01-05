@@ -3,3 +3,4 @@ vendor/
 statik/
 everest
 embedded/
+.DS_Store

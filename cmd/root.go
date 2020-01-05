@@ -45,7 +45,9 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 					return err
 				}
 			}
-
+			if err := s.AddApiHandler(); err != nil {
+				return err
+			}
 			return s.Start()
 		},
 	}

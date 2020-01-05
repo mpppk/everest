@@ -12,8 +12,7 @@ Download from [GitHub Releases](https://github.com/mpppk/everest/releases)
 
 ```bash
 $ go get -d github.com/mpppk/everest
-$ go generate
-$ go iinstall
+$ make install
 ```
 
 ## Usage

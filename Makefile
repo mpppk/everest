@@ -20,8 +20,22 @@ coverage:
 codecov:  coverage
 	bash <(curl -s https://codecov.io/bash)
 
+.PHONY: clean
+clean:
+	rm -rf embedded
+	rm -rf statik
+
+.PHONY: build-front
+build-front:
+	cd defaultembedded; yarn install
+	cd defaultembedded; yarn build
+
+.PHONY: generate
+generate: clean build-front
+	go generate
+
 .PHONY: build
-build:
+build: generate
 	go build
 
 .PHONY: cross-build-snapshot
@@ -29,7 +43,7 @@ cross-build:
 	goreleaser --rm-dist --snapshot
 
 .PHONY: install
-install:
+install: generate
 	go install
 
 .PHONY: circleci

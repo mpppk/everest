@@ -30,11 +30,12 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if err := exec.Command("statik", "-src", embeddedPath, "-p", embeddedPkgName).Run(); err != nil {
+			dstPath := os.TempDir()
+			statikCmd := []string{"-src", embeddedPath, "-dest", dstPath, "-p", embeddedPkgName}
+			if err := exec.Command("statik", statikCmd...).Run(); err != nil {
 				return err
 			}
 
-			dstPath := os.TempDir()
 			if err := writeFs(selfFs, dstPath); err != nil {
 				return err
 			}

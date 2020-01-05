@@ -1,5 +1,9 @@
 SHELL = /bin/bash
 
+.PHONY: setup
+setup:
+	go get github.com/rakyll/statik
+
 .PHONY: lint
 lint: generate
 	go vet ./...
@@ -31,7 +35,7 @@ build-front:
 	cd defaultembedded; yarn build
 
 .PHONY: generate
-generate: clean build-front
+generate: setup clean build-front
 	go generate
 
 .PHONY: build

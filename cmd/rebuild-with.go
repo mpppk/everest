@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 
 	"github.com/rakyll/statik/fs"
@@ -40,8 +39,11 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 			mainPath := filepath.Join(dstPath, "main.go")
-			exeName := path.Base(os.Args[0])
-			if err := exec.Command("go", "build", "-o", exeName, mainPath).Run(); err != nil {
+			exePath, err := os.Executable()
+			if err != nil {
+				return err
+			}
+			if err := exec.Command("go", "build", "-o", exePath, mainPath).Run(); err != nil {
 				return err
 			}
 			return nil

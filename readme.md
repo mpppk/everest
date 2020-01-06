@@ -5,12 +5,12 @@
 
 everest is the static file server with no runtime.
 
-everest also has the `rebuild-with` command to import the specified files into the binary.
+everest also has the `rebuild-with` command to import the specified files into the binary.  
 If you do that, you can serve imported files in a single binary.
 
 ## Installation
 
-Download from [GitHub Releases](https://github.com/mpppk/everest/releases)
+Download from [GitHub Releases](https://github.com/mpppk/everest/releases).
 
 ### From source
 
@@ -27,9 +27,9 @@ $ everest path/to/files
 Files are served on http://localhost:3000
 ```
 
-### import files to binary
+### Import files to binary
 
-*Note: under the hood, `rebuild-with` commnd use `go build` and `statik`, so you need install these first.*
+*Note: under the hood, `rebuild-with` commnd use `go build`, so you need install Go compiler first.*
 
 ```bash
 $ everest rebuild-with path/to/files
@@ -39,4 +39,4 @@ Embedded files are served on http://localhost:3000
 
 ## Credits
 
-<div>Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+<div>Logo icon made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

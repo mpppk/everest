@@ -30,7 +30,7 @@ build-front:
 	cd defaultembedded; yarn build
 
 .PHONY: generate
-generate: setup clean build-front
+generate: clean build-front
 	go generate
 
 .PHONY: build

@@ -10,9 +10,12 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/otiai10/copy v1.0.2
 	github.com/rakyll/statik v0.1.6
 	github.com/rhysd/go-github-selfupdate v1.2.1
 	github.com/shogo82148/assets-life v0.0.0-20191109095430-5008353e0749 // indirect
+	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
+	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5

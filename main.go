@@ -2,8 +2,7 @@ package main
 
 import "github.com/mpppk/everest/cmd"
 
-//go:generate statik -src .
-//go:generate statik -src defaultembedded/build -p embedded
+//go:generate go run scripts/gen.go
 
 func main() {
 	cmd.Execute()

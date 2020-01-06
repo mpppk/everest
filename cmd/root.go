@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mpppk/everest/embedded"
+
 	"github.com/mpppk/everest/server"
 
-	"github.com/rakyll/statik/fs"
-
-	_ "github.com/mpppk/everest/embedded"
 	"github.com/mpppk/everest/internal/option"
 	"github.com/spf13/afero"
 
@@ -30,12 +29,8 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 			s := server.New(conf.Port)
 
 			if len(args) == 0 {
-				embeddedFs, err := fs.New()
-				if err != nil {
-					return err
-				}
 				cmd.Println("Embedded files are served on http://localhost:" + conf.Port)
-				if err := s.AddFileHandlerFromFs(embeddedFs); err != nil {
+				if err := s.AddFileHandlerFromFs(embedded.Embedded); err != nil {
 					return err
 				}
 			} else {

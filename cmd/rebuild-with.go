@@ -1,17 +1,18 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
-	"os/exec"
-	"path/filepath"
 
-	"github.com/rakyll/statik/fs"
+	"github.com/mpppk/everest/lib"
+
+	"github.com/mpppk/everest/self"
+
+	"github.com/mpppk/everest/command"
 
 	"github.com/spf13/afero"
 
-	_ "github.com/mpppk/everest/statik"
 	"github.com/spf13/cobra"
 )
 
@@ -23,28 +24,19 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			embeddedPath := args[0]
-			embeddedPkgName := "embedded"
-
-			selfFs, err := fs.New()
+			dstPath, err := ioutil.TempDir(".", "everest-rebuild")
 			if err != nil {
 				return err
 			}
 
-			dstPath := os.TempDir()
-			statikCmd := []string{"-src", embeddedPath, "-dest", dstPath, "-p", embeddedPkgName}
-			if err := exec.Command("statik", statikCmd...).Run(); err != nil {
+			if err := rebuild(cmd, embeddedPath, dstPath); err != nil {
+				if err := lib.RemoveContents(dstPath); err != nil {
+					return err
+				}
 				return err
 			}
-
-			if err := writeFs(selfFs, dstPath); err != nil {
-				return err
-			}
-			mainPath := filepath.Join(dstPath, "main.go")
-			exePath, err := os.Executable()
-			if err != nil {
-				return err
-			}
-			if err := exec.Command("go", "build", "-o", exePath, mainPath).Run(); err != nil {
+			fmt.Println("removing", dstPath)
+			if err := lib.RemoveContents(dstPath); err != nil {
 				return err
 			}
 			return nil
@@ -53,23 +45,38 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func writeFs(fileSystem http.FileSystem, dst string) error {
-	return fs.Walk(fileSystem, "/", func(path string, info os.FileInfo, err error) error {
-		dstPath := filepath.Join(dst, path)
-		if info.IsDir() {
-			return os.MkdirAll(dstPath, 0777)
-		}
-		file, err := fileSystem.Open(path)
-		if err != nil {
-			return err
-		}
-		// FIXME use io.Pipe
-		contents, err := ioutil.ReadAll(file)
-		if err != nil {
-			return err
-		}
-		return ioutil.WriteFile(dstPath, contents, 0777)
+func rebuild(cmd *cobra.Command, embeddedPath, dstPath string) error {
+	if err := lib.GenerateEmbeddedPackage(embeddedPath, dstPath); err != nil {
+		return fmt.Errorf("failed to generate embedded package: %w", err)
+	}
+
+	if err := lib.WriteFs(self.Self, dstPath); err != nil {
+		return fmt.Errorf("failed to write self fs: %w", err)
+	}
+
+	if err := lib.GenerateSelfPackage(dstPath, dstPath); err != nil {
+		return fmt.Errorf("failed to generate self package: %w", err)
+	}
+
+	exePath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	stdout, err := command.GoBuild(&command.BuildOption{
+		Option: command.Option{
+			Dir: dstPath,
+		},
+		OutputPath: exePath,
+		BuildPath:  ".",
 	})
+	if err != nil {
+		return err
+	}
+	if stdout != "" {
+		cmd.Println(stdout)
+	}
+	return nil
 }
 
 func init() {

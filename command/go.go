@@ -8,14 +8,14 @@ import (
 )
 
 type BuildOption struct {
-	commandOption
+	Option
 	OutputPath string
 	BuildPath  string
 	OS         string
 	Arch       string
 }
 
-type commandOption struct {
+type Option struct {
 	Dir string
 	Env []string
 }
@@ -27,7 +27,7 @@ func GoGet(getPath string) (string, error) {
 		getPath,
 	}
 	fmt.Println("go", strings.Join(cmdArgs, " "))
-	stdout, err := execCommand("go", cmdArgs, &commandOption{})
+	stdout, err := execCommand("go", cmdArgs, &Option{})
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,7 @@ func GoBuild(opt *BuildOption) (string, error) {
 	return stdout.String(), nil
 }
 
-func execCommand(name string, args []string, opt *commandOption) (string, error) {
+func execCommand(name string, args []string, opt *Option) (string, error) {
 	var stderr, stdout bytes.Buffer
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = &stdout

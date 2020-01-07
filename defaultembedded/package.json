@@ -1,7 +1,6 @@
 {
   "name": "everest",
   "version": "0.1.0",
-  "homepage": "https://github.com/mpppk/everest",
   "repository": "https://github.com/mpppk/everest",
   "private": true,
   "dependencies": {

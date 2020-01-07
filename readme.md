@@ -1,12 +1,11 @@
 <div align="center">
-<img src="https://raw.github.com/wiki/mpppk/everest/images/logo.png" title="logo">
-
+<img src="https://raw.github.com/wiki/mpppk/everest/images/social_preview.png" title="logo">
 </div>
 
-everest is the static file server with no runtime.
+everest is the static file server with no dependencies.
 
-everest also has the `rebuild-with` command to import the specified files into the binary.  
-If you do that, you can serve imported files in a single binary.
+The most unique feature of everest is the `rebuild-with` command to import the specified files into the binary.  
+By execute the command once, everest can serve imported files in a single binary.
 
 ## Installation
 

@@ -7,7 +7,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-const Version = "1.2.3"
+const Version = "0.1.0"
 const slug = "mpppk/everest"
 
 // Do execute updating binary

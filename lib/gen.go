@@ -15,7 +15,7 @@ import (
 )
 
 func GenerateSelfPackage(srcPath, outputPath string) error {
-	srcDirs := []string{"cmd", "command", "internal", "server"}
+	srcDirs := []string{"cmd", "lib", "internal"}
 	var srcDirPaths []string
 	for _, srcDir := range srcDirs {
 		srcDirPaths = append(srcDirPaths, filepath.Join(srcPath, srcDir))

@@ -7,6 +7,10 @@ everest is the static file server with no dependencies.
 The most unique feature of everest is the `rebuild-with` command to import the specified files into the binary.  
 By execute the command once, everest can serve imported files in a single binary.
 
+<div align="center">
+<img src="https://raw.github.com/wiki/mpppk/everest/images/terminal.png" title="logo">
+</div>
+
 ## Installation
 
 Download from [GitHub Releases](https://github.com/mpppk/everest/releases).

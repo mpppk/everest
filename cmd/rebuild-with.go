@@ -9,8 +9,6 @@ import (
 
 	"github.com/mpppk/everest/self"
 
-	"github.com/mpppk/everest/command"
-
 	"github.com/spf13/afero"
 
 	"github.com/spf13/cobra"
@@ -63,8 +61,8 @@ func rebuild(cmd *cobra.Command, embeddedPath, dstPath string) error {
 		return err
 	}
 
-	stdout, err := command.GoBuild(&command.BuildOption{
-		Option: command.Option{
+	stdout, err := lib.GoBuild(&lib.BuildOption{
+		Option: lib.Option{
 			Dir: dstPath,
 		},
 		OutputPath: exePath,

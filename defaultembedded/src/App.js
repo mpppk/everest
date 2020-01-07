@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo} from 'react';
-import logo from './logo.svg';
+import logo from './logo.png';
 import './App.css';
 import {useDropzone} from "react-dropzone";
 import {Zlib} from 'zlibjs/bin/zip.min.js';
@@ -101,14 +101,14 @@ function App() {
                 <a href="https://github.com/mpppk/everest">
                     <img src={logo} className="App-logo" alt="logo"/>
                 </a>
-                <p>
-                </p>
-                <section className="container">
-                    <div {...getRootProps({style})}>
-                        <input {...getInputProps()} />
-                        <p>You can generate static file server by drag 'n' drop files here, or click to select files</p>
-                    </div>
-                </section>
+                <h2>everest</h2>
+                <p>static file server with no dependencies</p>
+                {/*<section className="container">*/}
+                {/*    <div {...getRootProps({style})}>*/}
+                {/*        <input {...getInputProps()} />*/}
+                {/*        <p>You can generate static file server by drag 'n' drop files here, or click to select files</p>*/}
+                {/*    </div>*/}
+                {/*</section>*/}
             </header>
         </div>
     );

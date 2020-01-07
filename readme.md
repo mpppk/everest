@@ -32,7 +32,7 @@ Files are served on http://localhost:3000
 
 ### Import files to binary
 
-*Note: under the hood, `rebuild-with` commnd use `go build`, so you need install Go compiler first.*
+*Note: under the hood, `rebuild-with` command use `go build`, so you need to install Go compiler first.*
 
 ```bash
 $ everest rebuild-with path/to/files

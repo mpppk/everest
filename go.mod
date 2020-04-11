@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/otiai10/copy v1.1.1
 	github.com/rakyll/statik v0.1.7
-	github.com/rhysd/go-github-selfupdate v1.2.1
+	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/afero v1.2.2

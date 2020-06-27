@@ -3,6 +3,7 @@ module github.com/mpppk/everest
 go 1.12
 
 require (
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/blang/semver/v4 v4.0.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect

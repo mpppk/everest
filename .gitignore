@@ -5,3 +5,4 @@ everest
 embedded/
 .DS_Store
 self/
+dist/

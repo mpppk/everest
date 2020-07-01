@@ -42,13 +42,13 @@ func (s *Server) Start() error {
 	return s.e.Start(":" + s.port)
 }
 
-func (s *Server) StartWithApp() error {
+func (s *Server) StartWithApp(width, height int) error {
 	go func() {
 		s.Start()
 	}()
 
 	// FIXME convert widht/height to variable
-	ui, _ := lorca.New("http://localhost:"+s.port, "", 720, 480)
+	ui, _ := lorca.New("http://localhost:"+s.port, "", width, height)
 	defer ui.Close()
 
 	// Wait until the interrupt signal arrives or browser window is closed

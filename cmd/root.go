@@ -15,6 +15,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// use string for "-ldflags -X"
+var appMode = "false"
+var width, height = 720, 480
+
 func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "everest",
@@ -44,7 +48,11 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			return s.StartWithApp()
+			if appMode == "true" {
+				return s.StartWithApp(width, height)
+			} else {
+				return s.Start()
+			}
 		},
 	}
 

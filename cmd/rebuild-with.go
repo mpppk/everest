@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const cmdPkgPath = "github.com/mpppk/everest/cmd"
+
 func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "rebuild-with",
@@ -66,7 +68,10 @@ func rebuild(cmd *cobra.Command, embeddedPath, dstPath string) error {
 			Dir: dstPath,
 		},
 		OutputPath: exePath,
-		BuildPath:  ".",
+		LdFlags: []string{
+			fmt.Sprintf("-X %s.appMode=true", cmdPkgPath),
+		},
+		BuildPath: ".",
 	})
 	if err != nil {
 		return err

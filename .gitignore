@@ -6,3 +6,4 @@ embedded/
 .DS_Store
 self/
 dist/
+everest.app

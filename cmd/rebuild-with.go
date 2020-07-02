@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/mpppk/everest/internal/option"
+
 	"github.com/mpppk/everest/lib"
 
 	"github.com/mpppk/everest/self"
@@ -23,13 +25,17 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 		Args:  cobra.ExactArgs(1),
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			conf, err := option.NewRebuildWithCmdConfigFromViper()
+			if err != nil {
+				return err
+			}
 			embeddedPath := args[0]
 			dstPath, err := ioutil.TempDir(".", "everest-rebuild")
 			if err != nil {
 				return err
 			}
 
-			if err := rebuild(cmd, embeddedPath, dstPath); err != nil {
+			if err := rebuild(cmd, embeddedPath, dstPath, conf.App); err != nil {
 				if err := lib.RemoveContents(dstPath); err != nil {
 					return err
 				}
@@ -42,10 +48,23 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 			return nil
 		},
 	}
+
+	appFlag := &option.BoolFlag{
+		Flag: &option.Flag{
+			Name:  "app",
+			Usage: "enable app mode",
+		},
+		Value: false,
+	}
+
+	if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
+		return nil, err
+	}
+
 	return cmd, nil
 }
 
-func rebuild(cmd *cobra.Command, embeddedPath, dstPath string) error {
+func rebuild(cmd *cobra.Command, embeddedPath, dstPath string, appMode bool) error {
 	if err := lib.GenerateEmbeddedPackage(embeddedPath, dstPath); err != nil {
 		return fmt.Errorf("failed to generate embedded package: %w", err)
 	}
@@ -63,16 +82,21 @@ func rebuild(cmd *cobra.Command, embeddedPath, dstPath string) error {
 		return err
 	}
 
-	stdout, err := lib.GoBuild(&lib.BuildOption{
+	buildOption := &lib.BuildOption{
 		Option: lib.Option{
 			Dir: dstPath,
 		},
 		OutputPath: exePath,
-		LdFlags: []string{
+		BuildPath:  ".",
+	}
+	if appMode {
+		buildOption.LdFlags = append(buildOption.LdFlags,
 			fmt.Sprintf("-X %s.appMode=true", cmdPkgPath),
-		},
-		BuildPath: ".",
-	})
+		)
+	}
+
+	stdout, err := lib.GoBuild(buildOption)
+
 	if err != nil {
 		return err
 	}

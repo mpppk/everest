@@ -7,6 +7,7 @@ import (
 
 type CmdConfig struct {
 	Port string
+	App  bool
 }
 
 func NewRootCmdConfigFromViper() (*CmdConfig, error) {
@@ -29,6 +30,7 @@ func newCmdRawConfig() (*CmdRawConfig, error) {
 func newCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
 	return &CmdConfig{
 		Port: rawConfig.Port,
+		App:  rawConfig.App,
 	}
 }
 

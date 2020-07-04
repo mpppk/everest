@@ -5,26 +5,32 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 )
-
-type MacOsAppConfig struct {
-	AppName        string
-	ExecutablePath string
-	IconPath       string
-	Identifier     string
-}
 
 const (
 	binName = "bin"
 )
 
-// FIXME
-const cmdPkgPath = "github.com/mpppk/everest/cmd"
+var defaultAppConfig = &AppConfig{
+	AppName:  "everest",
+	IconPath: "./defaultembedded/src/everest.icns",
+	Width:    720,
+	Height:   480,
+	MacOS: &MacOSAppConfig{
+		Identifier: "com.github.mpppk.everest",
+	},
+}
 
-func BuildMacOsApp(config *MacOsAppConfig, dst string) (string, error) {
-	appPath := path.Join(dst, config.AppName)
+func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
+	ApplyDefaultToAppConfig(config, defaultAppConfig)
+	appName := config.AppName
+	if !strings.Contains(appName, ".app") {
+		appName += ".app"
+	}
+	appPath := path.Join(dstDir, appName)
 
-	if isExist(appPath) {
+	if IsExist(appPath) {
 		if err := os.RemoveAll(appPath); err != nil {
 			return "", fmt.Errorf("failed to remove app from %s: %w", appPath, err)
 		}
@@ -41,24 +47,19 @@ func BuildMacOsApp(config *MacOsAppConfig, dst string) (string, error) {
 	}
 
 	binaryPath := path.Join(binaryDirPath, binName)
-	if err := copyFile(config.ExecutablePath, binaryPath); err != nil {
-		return "", fmt.Errorf("failed to copy file from %s to %s: %w", config.ExecutablePath, binaryPath, err)
+	if err := copyFile(execPath, binaryPath); err != nil {
+		return "", fmt.Errorf("failed to copy file from %s to %s: %w", execPath, binaryPath, err)
 	}
-	buildOpt := &BuildOption{
-		Option:     Option{Dir: "."},
-		OutputPath: binaryPath,
-		BuildPath:  ".",
-		LdFlags:    []string{fmt.Sprintf("-X %s.appMode=true", cmdPkgPath)},
-	}
-	if _, err := GoBuild(buildOpt); err != nil {
-		return "", fmt.Errorf("failed to build go binary: %w", err)
+
+	if err := os.Chmod(binaryPath, 0755); err != nil {
+		return "", fmt.Errorf("failed to change permission of binary: %w", err)
 	}
 
 	iconName := path.Base(config.IconPath)
 	iconPath := path.Join(resourcePath, iconName)
 
 	infoPlistPath := path.Join(appPath, "Contents", "Info.plist")
-	infoPlist := generateInfoPlist(binName, iconName, config.Identifier)
+	infoPlist := generateInfoPlist(binName, iconName, config.MacOS.Identifier)
 	if err := ioutil.WriteFile(infoPlistPath, []byte(infoPlist), 0777); err != nil {
 		return "", fmt.Errorf("failed to write info.plist to %s: %w", infoPlistPath, err)
 	}
@@ -67,11 +68,6 @@ func BuildMacOsApp(config *MacOsAppConfig, dst string) (string, error) {
 		return "", fmt.Errorf("failed to copy file from %s to %s: %w", config.IconPath, iconPath, err)
 	}
 	return appPath, nil
-}
-
-func isExist(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
 }
 
 func generateInfoPlist(executablePath, iconPath, identifier string) string {

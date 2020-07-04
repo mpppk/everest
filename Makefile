@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 .PHONY: lint
 lint: generate
-	go vet ./...
+	go vet $(go list ./... | grep -v /scripts/)
 
 .PHONY: test
 test: generate
@@ -39,7 +39,7 @@ build: generate
 
 .PHONY: build-macos-app
 build-macos-app: generate
-	go run scripts/build-macos.go
+	go run scripts/build-mac
 
 .PHONY: cross-build-snapshot
 cross-build:

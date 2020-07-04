@@ -1,12 +1,17 @@
 package lib
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
+
+	"github.com/zserge/lorca"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,6 +40,32 @@ func (s *Server) AddFileHandlerFromFs(fs http.FileSystem) error {
 
 func (s *Server) Start() error {
 	return s.e.Start(":" + s.port)
+}
+
+func (s *Server) StartWithApp(width, height int) error {
+	go func() {
+		s.Start()
+	}()
+
+	// FIXME convert widht/height to variable
+	ui, _ := lorca.New("http://localhost:"+s.port, "", width, height)
+	defer ui.Close()
+
+	// Wait until the interrupt signal arrives or browser window is closed
+	sigc := make(chan os.Signal)
+	signal.Notify(sigc, os.Interrupt)
+	select {
+	case <-sigc:
+	case <-ui.Done():
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	return s.Shutdown(ctx)
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.e.Shutdown(ctx)
 }
 
 func (s *Server) AddApiHandler() error {

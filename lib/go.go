@@ -13,6 +13,7 @@ type BuildOption struct {
 	BuildPath  string
 	OS         string
 	Arch       string
+	LdFlags    []string
 }
 
 type Option struct {
@@ -36,9 +37,14 @@ func GoGet(getPath string) (string, error) {
 
 func GoBuild(opt *BuildOption) (string, error) {
 	var stderr, stdout bytes.Buffer
+	ldflags := ""
+	if len(opt.LdFlags) > 0 {
+		ldflags = "-ldflags=" + strings.Join(opt.LdFlags, " ")
+	}
 	cmdArgs := []string{
 		"build",
 		"-o", opt.OutputPath,
+		ldflags,
 		opt.BuildPath,
 	}
 	fmt.Println("go", strings.Join(cmdArgs, " "))

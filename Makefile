@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 .PHONY: lint
 lint: generate
-	go vet ./...
+	go vet $(go list ./... | grep -v /scripts/)
 
 .PHONY: test
 test: generate
@@ -37,6 +37,10 @@ generate: clean build-front
 build: generate
 	go build
 
+.PHONY: build-macos-app
+build-macos-app: generate
+	go run scripts/build-mac/build-mac
+
 .PHONY: cross-build-snapshot
 cross-build:
 	goreleaser --rm-dist --snapshot
@@ -48,3 +52,8 @@ install: generate
 .PHONY: circleci
 circleci:
 	circleci build -e GITHUB_TOKEN=$GITHUB_TOKEN
+
+.PHONY: macos-icon
+macos-icon:
+	iconutil -c icns everest.iconset
+	mv -f everest.icns defaultembedded/src/

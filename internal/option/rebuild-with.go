@@ -1,7 +1,7 @@
 package option
 
 type RebuildWithCmdConfig struct {
-	Port string
+	App bool
 }
 
 func NewRebuildWithCmdConfigFromViper() (*RebuildWithCmdConfig, error) {
@@ -11,7 +11,7 @@ func NewRebuildWithCmdConfigFromViper() (*RebuildWithCmdConfig, error) {
 
 func newRebuildWithCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *RebuildWithCmdConfig {
 	return &RebuildWithCmdConfig{
-		Port: rawConfig.Port,
+		App: rawConfig.App,
 	}
 }
 

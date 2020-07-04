@@ -10,7 +10,6 @@ import (
 	"github.com/mpppk/everest/internal/option"
 
 	"github.com/mpppk/everest/lib"
-
 	"github.com/mpppk/everest/self"
 
 	"github.com/spf13/afero"
@@ -44,7 +43,7 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if buildLog, err := rebuild(embeddedPath, dstPath, executableName, conf.App); err != nil {
+			if buildLog, err := rebuildEverest(embeddedPath, dstPath, executableName, conf.App); err != nil {
 				if err := lib.RemoveContents(dstPath); err != nil {
 					return err
 				}
@@ -107,15 +106,20 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 	return cmd, nil
 }
 
-func rebuildAndReplace(embeddedPath, dstPath string, appMode bool) (string, error) {
-	execPath, err := os.Executable()
-	if err != nil {
-		return "", err
+func getConfigFilePath(embeddedPath string) (string, bool) {
+	configFilePath := path.Join(embeddedPath, "everest.yaml")
+	if lib.IsExist(configFilePath) {
+		return configFilePath, true
 	}
-	return rebuild(embeddedPath, dstPath, execPath, appMode)
+
+	configFilePath = path.Join(embeddedPath, "everest.yml")
+	if lib.IsExist(configFilePath) {
+		return configFilePath, true
+	}
+	return "", false
 }
 
-func rebuild(embeddedPath, workDir, execPath string, appMode bool) (buildLog string, err error) {
+func rebuildEverest(embeddedPath, workDir, execPath string, appMode bool) (buildLog string, err error) {
 	if err := lib.GenerateEmbeddedPackage(embeddedPath, workDir); err != nil {
 		return "", fmt.Errorf("failed to generate embedded package: %w", err)
 	}
@@ -142,19 +146,6 @@ func rebuild(embeddedPath, workDir, execPath string, appMode bool) (buildLog str
 	}
 
 	return lib.GoBuild(buildOption)
-}
-
-func getConfigFilePath(embeddedPath string) (string, bool) {
-	configFilePath := path.Join(embeddedPath, "everest.yaml")
-	if lib.IsExist(configFilePath) {
-		return configFilePath, true
-	}
-
-	configFilePath = path.Join(embeddedPath, "everest.yml")
-	if lib.IsExist(configFilePath) {
-		return configFilePath, true
-	}
-	return "", false
 }
 
 func init() {

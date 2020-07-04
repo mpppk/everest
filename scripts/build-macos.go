@@ -1,18 +1,30 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/mpppk/everest/lib"
 )
 
-func main() {
-	conf := &lib.MacOsAppConfig{
-		AppName:        "everest.app",
-		ExecutablePath: "./everest",
-		IconPath:       "./defaultembedded/src/everest.icns",
-		Identifier:     "com.github.mpppk.everest",
-	}
+const cmdPkgPath = "github.com/mpppk/everest/cmd"
 
-	if _, err := lib.BuildMacOsApp(conf, "."); err != nil {
+func main() {
+	conf := &lib.AppConfig{}
+
+	buildOption := &lib.BuildOption{
+		Option: lib.Option{
+			Dir: ".",
+		},
+		OutputPath: "./everest",
+		BuildPath:  ".",
+		LdFlags:    []string{fmt.Sprintf("-X %s.appMode=true", cmdPkgPath)},
+	}
+	buildLog, err := lib.GoBuild(buildOption)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(buildLog)
+	if _, err := lib.BuildMacOsApp(conf, "everest", "."); err != nil {
 		panic(err)
 	}
 }

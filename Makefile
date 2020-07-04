@@ -39,7 +39,7 @@ build: generate
 
 .PHONY: build-macos-app
 build-macos-app: generate
-	go run scripts/build-mac
+	go run scripts/build-mac/build-mac
 
 .PHONY: cross-build-snapshot
 cross-build:

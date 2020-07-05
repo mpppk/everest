@@ -58,7 +58,7 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if appMode == "true" {
+			if conf.App || appMode == "true" {
 				w, h, err := parseWidthAndHeight(width, height)
 				if err != nil {
 					return err
@@ -93,6 +93,18 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 		Value: false,
 	}
 	if err := option.RegisterBoolFlag(cmd, verboseFlag); err != nil {
+		return nil, err
+	}
+
+	appFlag := &option.BoolFlag{
+		Flag: &option.Flag{
+			Name:         "app",
+			Usage:        "Launch as App",
+			IsPersistent: false,
+		},
+		Value: false,
+	}
+	if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
 		return nil, err
 	}
 

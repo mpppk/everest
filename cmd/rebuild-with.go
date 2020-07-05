@@ -23,11 +23,16 @@ const cmdPkgPath = "github.com/mpppk/everest/cmd"
 const executableName = "bin"
 
 func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
+	pRunE := func(cmd *cobra.Command, args []string) error {
+		return registerFlags(cmd)
+	}
+
 	cmd := &cobra.Command{
-		Use:   "rebuild-with",
-		Short: "rebuild everest with specified resources",
-		Args:  cobra.ExactArgs(1),
-		Long:  ``,
+		Use:     "rebuild-with",
+		Short:   "rebuild everest with specified resources",
+		Args:    cobra.ExactArgs(1),
+		Long:    ``,
+		PreRunE: pRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			conf, err := option.NewRebuildWithCmdConfigFromViper()
 			if err != nil {
@@ -93,6 +98,10 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 		},
 	}
 
+	return cmd, nil
+}
+
+func registerFlags(cmd *cobra.Command) error {
 	appFlag := &option.BoolFlag{
 		Flag: &option.Flag{
 			Name:  "app",
@@ -102,10 +111,9 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 	}
 
 	if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
-		return nil, err
+		return fmt.Errorf("failed  to register app flag: %w", err)
 	}
-
-	return cmd, nil
+	return nil
 }
 
 func getConfigFilePath(embeddedPath string) (string, bool) {

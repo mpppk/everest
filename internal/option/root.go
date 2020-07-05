@@ -13,7 +13,7 @@ type CmdConfig struct {
 
 func NewRootCmdConfigFromViper() (*CmdConfig, error) {
 	rawConfig, err := newCmdRawConfig()
-	return newCmdConfigFromRawConfig(rawConfig), err
+	return newRootCmdConfigFromRawConfig(rawConfig), err
 }
 
 func newCmdRawConfig() (*CmdRawConfig, error) {
@@ -28,7 +28,7 @@ func newCmdRawConfig() (*CmdRawConfig, error) {
 	return &conf, nil
 }
 
-func newCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
+func newRootCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
 	return &CmdConfig{
 		Port:    rawConfig.Port,
 		App:     rawConfig.App,

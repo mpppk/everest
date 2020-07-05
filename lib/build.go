@@ -12,7 +12,7 @@ const (
 	binName = "bin"
 )
 
-var defaultAppConfig = &AppConfig{
+var DefaultAppConfig = &AppConfig{
 	AppName:  "everest",
 	IconPath: "./defaultembedded/src/everest.icns",
 	Width:    720,
@@ -23,7 +23,6 @@ var defaultAppConfig = &AppConfig{
 }
 
 func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
-	ApplyDefaultToAppConfig(config, defaultAppConfig)
 	appName := config.AppName
 	if !strings.Contains(appName, ".app") {
 		appName += ".app"

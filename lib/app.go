@@ -8,15 +8,15 @@ import (
 )
 
 type MacOSAppConfig struct {
-	Identifier string
+	Identifier string `yaml:"Identifier"`
 }
 
 type AppConfig struct {
-	AppName  string
-	IconPath string
-	Width    int
-	Height   int
-	MacOS    *MacOSAppConfig
+	AppName  string          `yaml:"AppName"`
+	IconPath string          `yaml:"IconPath"`
+	Width    int             `yaml:"Width"`
+	Height   int             `yaml:"Height"`
+	MacOS    *MacOSAppConfig `yaml:"MacOS"`
 }
 
 func ParseAppConfig(configPath string) (*AppConfig, error) {
@@ -25,7 +25,7 @@ func ParseAppConfig(configPath string) (*AppConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load everest config file from %s: %w", configPath, err)
 	}
-	if err := yaml.Unmarshal(contents, config); err != nil {
+	if err := yaml.Unmarshal(contents, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config YAML from %s: %w", configPath, err)
 	}
 	return &config, nil

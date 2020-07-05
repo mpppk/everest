@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/mpppk/everest/lib"
 
@@ -17,7 +18,7 @@ import (
 
 // use string for "-ldflags -X"
 var appMode = "false"
-var width, height = 720, 480
+var width, height = "720", "480"
 
 func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	cmd := &cobra.Command{
@@ -49,7 +50,11 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 			}
 
 			if appMode == "true" {
-				return s.StartWithApp(width, height)
+				w, h, err := parseWidthAndHeight(width, height)
+				if err != nil {
+					return err
+				}
+				return s.StartWithApp(w, h)
 			} else {
 				return s.Start()
 			}
@@ -81,6 +86,19 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	cmd.AddCommand(subCmds...)
 
 	return cmd, nil
+}
+
+func parseWidthAndHeight(width, height string) (int, int, error) {
+	w, err := strconv.Atoi(width)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse width from %s: %w", width, err)
+	}
+
+	h, err := strconv.Atoi(height)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse height from %s: %w", height, err)
+	}
+	return w, h, nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

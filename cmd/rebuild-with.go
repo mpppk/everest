@@ -34,8 +34,16 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 			embeddedPath := args[0]
 			configPath, hasConfig := getConfigFilePath(embeddedPath)
 
-			if hasConfig { // FIXME add -server flag
-				conf.App = true
+			var appConfig *lib.AppConfig
+			if hasConfig {
+				a, err := lib.ParseAppConfig(configPath)
+				if err != nil {
+					return fmt.Errorf("failed to parse everest appConfig from %s: %w", configPath, err)
+				}
+				appConfig = a
+				lib.ApplyDefaultToAppConfig(appConfig, lib.DefaultAppConfig)
+			} else if conf.App {
+				appConfig = lib.DefaultAppConfig
 			}
 
 			dstPath, err := ioutil.TempDir(".", "everest-rebuild")
@@ -43,7 +51,7 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if buildLog, err := rebuildEverest(embeddedPath, dstPath, executableName, conf.App); err != nil {
+			if buildLog, err := rebuildEverest(embeddedPath, dstPath, executableName, appConfig); err != nil {
 				if err := lib.RemoveContents(dstPath); err != nil {
 					return err
 				}
@@ -53,15 +61,7 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 			}
 
 			execPath := path.Join(dstPath, executableName)
-			if conf.App {
-				appConfig := &lib.AppConfig{}
-				if hasConfig {
-					a, err := lib.ParseAppConfig(configPath)
-					if err != nil {
-						return fmt.Errorf("failed to parse everest appConfig from %s: %w", configPath, err)
-					}
-					appConfig = a
-				}
+			if appConfig != nil {
 				switch runtime.GOOS {
 				case "darwin":
 					if macOsAppPath, err := lib.BuildMacOsApp(appConfig, execPath, "."); err != nil {
@@ -119,7 +119,7 @@ func getConfigFilePath(embeddedPath string) (string, bool) {
 	return "", false
 }
 
-func rebuildEverest(embeddedPath, workDir, execPath string, appMode bool) (buildLog string, err error) {
+func rebuildEverest(embeddedPath, workDir, execPath string, appConfig *lib.AppConfig) (buildLog string, err error) {
 	if err := lib.GenerateEmbeddedPackage(embeddedPath, workDir); err != nil {
 		return "", fmt.Errorf("failed to generate embedded package: %w", err)
 	}
@@ -139,9 +139,11 @@ func rebuildEverest(embeddedPath, workDir, execPath string, appMode bool) (build
 		OutputPath: execPath,
 		BuildPath:  ".",
 	}
-	if appMode {
+	if appConfig != nil {
 		buildOption.LdFlags = append(buildOption.LdFlags,
 			fmt.Sprintf("-X %s.appMode=true", cmdPkgPath),
+			fmt.Sprintf("-X %s.width=%d", cmdPkgPath, appConfig.Width),
+			fmt.Sprintf("-X %s.height=%d", cmdPkgPath, appConfig.Height),
 		)
 	}
 

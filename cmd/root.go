@@ -22,7 +22,7 @@ var width, height = "720", "480"
 
 func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	pPreRunE := func(cmd *cobra.Command, args []string) error {
-		conf, err := option.NewRootCmdConfigFromViper()
+		conf, err := option.NewPersistCmdConfigFromViper()
 		if err != nil {
 			return err
 		}
@@ -66,6 +66,17 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 		if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
 			return err
 		}
+		serverFlag := &option.BoolFlag{
+			Flag: &option.Flag{
+				Name:         "server",
+				Usage:        "Launch as server",
+				IsPersistent: false,
+			},
+			Value: false,
+		}
+		if err := option.RegisterBoolFlag(cmd, serverFlag); err != nil {
+			return err
+		}
 		return nil
 	}
 
@@ -76,6 +87,9 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 		PersistentPreRunE: pPreRunE,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := viper.BindPFlag("app", cmd.Flags().Lookup("app")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("server", cmd.Flags().Lookup("server")); err != nil {
 				return err
 			}
 			if err := viper.BindPFlag("port", cmd.Flags().Lookup("port")); err != nil {
@@ -107,7 +121,7 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if conf.App || appMode == "true" {
+			if conf.App || !conf.Server || appMode == "true" {
 				w, h, err := parseWidthAndHeight(width, height)
 				if err != nil {
 					return err

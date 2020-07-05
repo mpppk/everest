@@ -41,7 +41,6 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 					return fmt.Errorf("failed to parse everest appConfig from %s: %w", configPath, err)
 				}
 				appConfig = a
-				lib.ApplyDefaultToAppConfig(appConfig, lib.DefaultAppConfig)
 			} else if conf.App {
 				appConfig = lib.DefaultAppConfig
 			}

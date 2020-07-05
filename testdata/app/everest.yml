@@ -1,3 +1,5 @@
 AppName: "everest-app"
 Width: 480
 Height: 320
+MacOS:
+  IconPath: ../../defaultembedded/src/everest.icns

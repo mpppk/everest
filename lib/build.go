@@ -63,7 +63,7 @@ func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
 		return "", fmt.Errorf("failed to write info.plist to %s: %w", infoPlistPath, err)
 	}
 
-	if err := copyFile(config.IconPath, iconPath); err != nil {
+	if err := copyFile(config.MacOS.AbsIconPath, iconPath); err != nil {
 		return "", fmt.Errorf("failed to copy file from %s to %s: %w", config.IconPath, iconPath, err)
 	}
 	return appPath, nil

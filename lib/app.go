@@ -3,20 +3,25 @@ package lib
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
 
 type MacOSAppConfig struct {
-	Identifier string `yaml:"Identifier"`
+	Identifier  string `yaml:"Identifier"`
+	IconPath    string `yaml:"IconPath"`
+	AbsIconPath string
 }
 
 type AppConfig struct {
-	AppName  string          `yaml:"AppName"`
-	IconPath string          `yaml:"IconPath"`
-	Width    int             `yaml:"Width"`
-	Height   int             `yaml:"Height"`
-	MacOS    *MacOSAppConfig `yaml:"MacOS"`
+	BaseDir     string
+	AppName     string `yaml:"AppName"`
+	IconPath    string `yaml:"IconPath"`
+	AbsIconPath string
+	Width       int             `yaml:"Width"`
+	Height      int             `yaml:"Height"`
+	MacOS       *MacOSAppConfig `yaml:"MacOS"`
 }
 
 func ParseAppConfig(configPath string) (*AppConfig, error) {
@@ -28,6 +33,39 @@ func ParseAppConfig(configPath string) (*AppConfig, error) {
 	if err := yaml.Unmarshal(contents, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config YAML from %s: %w", configPath, err)
 	}
+
+	isDefaultIcon := true
+	if config.IconPath != "" {
+		isDefaultIcon = false
+	}
+
+	isDefaultMacOSIcon := true
+	if config.MacOS != nil && config.MacOS.IconPath != "" {
+		isDefaultMacOSIcon = false
+	}
+
+	ApplyDefaultToAppConfig(&config, DefaultAppConfig)
+
+	config.BaseDir = filepath.Dir(configPath)
+	config.AbsIconPath = config.IconPath
+	if !isDefaultIcon && !filepath.IsAbs(config.IconPath) {
+		relPath := filepath.Join(config.BaseDir, config.IconPath)
+		absPath, err := filepath.Abs(relPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert icon path(%s) to abs path: %w", relPath, err)
+		}
+		config.AbsIconPath = absPath
+	}
+
+	if !isDefaultMacOSIcon && !filepath.IsAbs(config.MacOS.IconPath) {
+		relPath := filepath.Join(config.BaseDir, config.MacOS.IconPath)
+		absPath, err := filepath.Abs(relPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert icon path(%s) to abs path: %w", relPath, err)
+		}
+		config.MacOS.AbsIconPath = absPath
+	}
+
 	return &config, nil
 }
 

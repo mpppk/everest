@@ -9,21 +9,20 @@ import (
 )
 
 const (
-	binName = "bin"
+	binName  = "bin"
+	iconName = "app.icns"
 )
 
-var defaultAppConfig = &AppConfig{
-	AppName:  "everest",
-	IconPath: "./defaultembedded/src/everest.icns",
-	Width:    720,
-	Height:   480,
+var DefaultAppConfig = &AppConfig{
+	AppName: "everest",
+	Width:   720,
+	Height:  480,
 	MacOS: &MacOSAppConfig{
 		Identifier: "com.github.mpppk.everest",
 	},
 }
 
 func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
-	ApplyDefaultToAppConfig(config, defaultAppConfig)
 	appName := config.AppName
 	if !strings.Contains(appName, ".app") {
 		appName += ".app"
@@ -55,7 +54,6 @@ func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
 		return "", fmt.Errorf("failed to change permission of binary: %w", err)
 	}
 
-	iconName := path.Base(config.IconPath)
 	iconPath := path.Join(resourcePath, iconName)
 
 	infoPlistPath := path.Join(appPath, "Contents", "Info.plist")
@@ -64,8 +62,8 @@ func BuildMacOsApp(config *AppConfig, execPath, dstDir string) (string, error) {
 		return "", fmt.Errorf("failed to write info.plist to %s: %w", infoPlistPath, err)
 	}
 
-	if err := copyFile(config.IconPath, iconPath); err != nil {
-		return "", fmt.Errorf("failed to copy file from %s to %s: %w", config.IconPath, iconPath, err)
+	if err := copyFile(config.MacOS.AbsIconPath, iconPath); err != nil {
+		return "", fmt.Errorf("failed to copy file from %s to %s: %w", config.MacOS.AbsIconPath, iconPath, err)
 	}
 	return appPath, nil
 }

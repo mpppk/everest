@@ -15,13 +15,11 @@ type MacOSAppConfig struct {
 }
 
 type AppConfig struct {
-	BaseDir     string
-	AppName     string `yaml:"AppName"`
-	IconPath    string `yaml:"IconPath"`
-	AbsIconPath string
-	Width       int             `yaml:"Width"`
-	Height      int             `yaml:"Height"`
-	MacOS       *MacOSAppConfig `yaml:"MacOS"`
+	BaseDir string
+	AppName string          `yaml:"AppName"`
+	Width   int             `yaml:"Width"`
+	Height  int             `yaml:"Height"`
+	MacOS   *MacOSAppConfig `yaml:"MacOS"`
 }
 
 func ParseAppConfig(configPath string) (*AppConfig, error) {
@@ -34,11 +32,6 @@ func ParseAppConfig(configPath string) (*AppConfig, error) {
 		return nil, fmt.Errorf("failed to unmarshal config YAML from %s: %w", configPath, err)
 	}
 
-	isDefaultIcon := true
-	if config.IconPath != "" {
-		isDefaultIcon = false
-	}
-
 	isDefaultMacOSIcon := true
 	if config.MacOS != nil && config.MacOS.IconPath != "" {
 		isDefaultMacOSIcon = false
@@ -47,15 +40,6 @@ func ParseAppConfig(configPath string) (*AppConfig, error) {
 	ApplyDefaultToAppConfig(&config, DefaultAppConfig)
 
 	config.BaseDir = filepath.Dir(configPath)
-	config.AbsIconPath = config.IconPath
-	if !isDefaultIcon && !filepath.IsAbs(config.IconPath) {
-		relPath := filepath.Join(config.BaseDir, config.IconPath)
-		absPath, err := filepath.Abs(relPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert icon path(%s) to abs path: %w", relPath, err)
-		}
-		config.AbsIconPath = absPath
-	}
 
 	if !isDefaultMacOSIcon && !filepath.IsAbs(config.MacOS.IconPath) {
 		relPath := filepath.Join(config.BaseDir, config.MacOS.IconPath)
@@ -72,9 +56,6 @@ func ParseAppConfig(configPath string) (*AppConfig, error) {
 func ApplyDefaultToAppConfig(base, defaultConf *AppConfig) {
 	if base.AppName == "" {
 		base.AppName = defaultConf.AppName
-	}
-	if base.IconPath == "" {
-		base.IconPath = defaultConf.IconPath
 	}
 	if base.Width == 0 {
 		base.Width = defaultConf.Width

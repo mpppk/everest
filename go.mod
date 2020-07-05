@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/blang/semver/v4 v4.0.0
+	github.com/comail/colog v0.0.0-20160416085026-fba8e7b1f46c
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/otiai10/copy v1.2.0
 	github.com/rakyll/statik v0.1.7

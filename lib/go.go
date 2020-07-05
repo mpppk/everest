@@ -3,6 +3,7 @@ package lib
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -47,9 +48,8 @@ func GoBuild(opt *BuildOption) (string, error) {
 		ldflags,
 		opt.BuildPath,
 	}
-	fmt.Println("go", strings.Join(cmdArgs, " "))
+	log.Println("info:", "go", strings.Join(cmdArgs, " "))
 	cmd := exec.Command("go", cmdArgs...)
-	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
 	if opt.Env != nil {

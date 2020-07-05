@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 
 	"github.com/mpppk/everest/internal/option"
@@ -49,14 +51,20 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 			if err != nil {
 				return err
 			}
+			log.Printf("debug: temp dir is created as %s\n", dstPath)
+
+			defer func() {
+				log.Printf("debug: removing temp dir from %s\n", dstPath)
+				if err := lib.RemoveContents(dstPath); err != nil {
+					log.Println("error: failed to remove temp dir from", dstPath)
+					panic(err)
+				}
+			}()
 
 			if buildLog, err := rebuildEverest(embeddedPath, dstPath, executableName, appConfig); err != nil {
-				if err := lib.RemoveContents(dstPath); err != nil {
-					return err
-				}
-				return err
-			} else {
-				cmd.Println(buildLog)
+				return fmt.Errorf("failed to rebuild everest: %w", err)
+			} else if buildLog != "" {
+				log.Println(buildLog)
 			}
 
 			execPath := path.Join(dstPath, executableName)
@@ -66,10 +74,10 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 					if macOsAppPath, err := lib.BuildMacOsApp(appConfig, execPath, "."); err != nil {
 						return fmt.Errorf("failed to build MacOSApp: %w", err)
 					} else {
-						cmd.Printf("MacOS App is generated to %s\n", macOsAppPath)
+						log.Printf("info: MacOS App is generated to %s\n", macOsAppPath)
 					}
 				default:
-					cmd.Println("unknown OS:", runtime.GOOS)
+					log.Println("error: unknown OS:", runtime.GOOS)
 				}
 			} else {
 				everestPath, err := os.Executable()
@@ -79,11 +87,6 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				if err := os.Rename(execPath, everestPath); err != nil {
 					return fmt.Errorf("failed to move new executable from %s to %s: %w", execPath, everestPath, err)
 				}
-			}
-
-			cmd.Println("removing", dstPath)
-			if err := lib.RemoveContents(dstPath); err != nil {
-				return err
 			}
 
 			return nil
@@ -122,14 +125,17 @@ func rebuildEverest(embeddedPath, workDir, execPath string, appConfig *lib.AppCo
 	if err := lib.GenerateEmbeddedPackage(embeddedPath, workDir); err != nil {
 		return "", fmt.Errorf("failed to generate embedded package: %w", err)
 	}
+	log.Printf("debug: target files (%s) are converted to Go sources and outputted to %s\n", embeddedPath, filepath.Join(workDir, "embedded"))
 
 	if err := lib.WriteFs(self.Self, workDir); err != nil {
 		return "", fmt.Errorf("failed to write self fs: %w", err)
 	}
+	log.Printf("debug: everest sources are outputted to %s\n", filepath.Join(workDir))
 
 	if err := lib.GenerateSelfPackage(workDir, workDir); err != nil {
 		return "", fmt.Errorf("failed to generate self package: %w", err)
 	}
+	log.Printf("debug: everest sources are converted to Go sources and outputted to %s\n", filepath.Join(workDir, "self"))
 
 	buildOption := &lib.BuildOption{
 		Option: lib.Option{

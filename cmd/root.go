@@ -21,10 +21,19 @@ var appMode = "false"
 var width, height = "720", "480"
 
 func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
+	pPreRunE := func(cmd *cobra.Command, args []string) error {
+		conf, err := option.NewRootCmdConfigFromViper()
+		if err != nil {
+			return err
+		}
+		lib.InitializeLog(conf.Verbose)
+		return nil
+	}
 	cmd := &cobra.Command{
-		Use:   "everest",
-		Short: "everest",
-		Args:  cobra.MaximumNArgs(1),
+		Use:               "everest",
+		Short:             "everest",
+		Args:              cobra.MaximumNArgs(1),
+		PersistentPreRunE: pPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			conf, err := option.NewRootCmdConfigFromViper()
 			if err != nil {
@@ -66,12 +75,24 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 			Flag: &option.Flag{
 				Name:         "port",
 				Usage:        "port",
-				IsPersistent: true,
+				IsPersistent: false,
 			},
 			Value: "3000",
 		}
 	}
 	if err := option.RegisterStringFlag(cmd, newPortFlag()); err != nil {
+		return nil, err
+	}
+
+	verboseFlag := &option.BoolFlag{
+		Flag: &option.Flag{
+			Name:         "verbose",
+			Usage:        "show details logs",
+			IsPersistent: true,
+		},
+		Value: false,
+	}
+	if err := option.RegisterBoolFlag(cmd, verboseFlag); err != nil {
 		return nil, err
 	}
 

@@ -47,7 +47,6 @@ func (s *Server) StartWithApp(width, height int) error {
 		s.Start()
 	}()
 
-	// FIXME convert widht/height to variable
 	ui, _ := lorca.New("http://localhost:"+s.port, "", width, height)
 	defer ui.Close()
 

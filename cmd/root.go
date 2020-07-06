@@ -22,18 +22,81 @@ var width, height = "720", "480"
 
 func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 	pPreRunE := func(cmd *cobra.Command, args []string) error {
-		conf, err := option.NewRootCmdConfigFromViper()
+		conf, err := option.NewPersistCmdConfigFromViper()
 		if err != nil {
 			return err
 		}
 		lib.InitializeLog(conf.Verbose)
 		return nil
 	}
+
+	registerFlags := func(cmd *cobra.Command) error {
+		portFlag := &option.StringFlag{
+			Flag: &option.Flag{
+				Name:         "port",
+				Usage:        "port",
+				IsPersistent: false,
+			},
+			Value: "3000",
+		}
+		if err := option.RegisterStringFlag(cmd, portFlag); err != nil {
+			return err
+		}
+
+		verboseFlag := &option.BoolFlag{
+			Flag: &option.Flag{
+				Name:         "verbose",
+				Usage:        "show detail logs",
+				IsPersistent: true,
+			},
+			Value: false,
+		}
+		if err := option.RegisterBoolFlag(cmd, verboseFlag); err != nil {
+			return err
+		}
+
+		appFlag := &option.BoolFlag{
+			Flag: &option.Flag{
+				Name:         "app",
+				Usage:        "Launch as App",
+				IsPersistent: false,
+			},
+			Value: false,
+		}
+		if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
+			return err
+		}
+		serverFlag := &option.BoolFlag{
+			Flag: &option.Flag{
+				Name:         "server",
+				Usage:        "Launch as server",
+				IsPersistent: false,
+			},
+			Value: false,
+		}
+		if err := option.RegisterBoolFlag(cmd, serverFlag); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	cmd := &cobra.Command{
 		Use:               "everest",
 		Short:             "everest",
 		Args:              cobra.MaximumNArgs(1),
 		PersistentPreRunE: pPreRunE,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := viper.BindPFlag("app", cmd.Flags().Lookup("app")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("server", cmd.Flags().Lookup("server")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("port", cmd.Flags().Lookup("port")); err != nil {
+				return err
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			conf, err := option.NewRootCmdConfigFromViper()
 			if err != nil {
@@ -58,7 +121,7 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 				return err
 			}
 
-			if appMode == "true" {
+			if conf.App || !conf.Server || appMode == "true" {
 				w, h, err := parseWidthAndHeight(width, height)
 				if err != nil {
 					return err
@@ -70,29 +133,7 @@ func NewRootCmd(aferoFs afero.Fs) (*cobra.Command, error) {
 		},
 	}
 
-	newPortFlag := func() *option.StringFlag {
-		return &option.StringFlag{
-			Flag: &option.Flag{
-				Name:         "port",
-				Usage:        "port",
-				IsPersistent: false,
-			},
-			Value: "3000",
-		}
-	}
-	if err := option.RegisterStringFlag(cmd, newPortFlag()); err != nil {
-		return nil, err
-	}
-
-	verboseFlag := &option.BoolFlag{
-		Flag: &option.Flag{
-			Name:         "verbose",
-			Usage:        "show details logs",
-			IsPersistent: true,
-		},
-		Value: false,
-	}
-	if err := option.RegisterBoolFlag(cmd, verboseFlag); err != nil {
+	if err := registerFlags(cmd); err != nil {
 		return nil, err
 	}
 

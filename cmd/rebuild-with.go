@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/spf13/viper"
+
 	"github.com/mpppk/everest/internal/option"
 
 	"github.com/mpppk/everest/lib"
@@ -23,11 +25,19 @@ const cmdPkgPath = "github.com/mpppk/everest/cmd"
 const executableName = "bin"
 
 func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
+	pRunE := func(cmd *cobra.Command, args []string) error {
+		if err := viper.BindPFlag("app", cmd.Flags().Lookup("app")); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	cmd := &cobra.Command{
-		Use:   "rebuild-with",
-		Short: "rebuild everest with specified resources",
-		Args:  cobra.ExactArgs(1),
-		Long:  ``,
+		Use:     "rebuild-with",
+		Short:   "rebuild everest with specified resources",
+		Args:    cobra.ExactArgs(1),
+		Long:    ``,
+		PreRunE: pRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			conf, err := option.NewRebuildWithCmdConfigFromViper()
 			if err != nil {
@@ -93,15 +103,22 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 		},
 	}
 
-	appFlag := &option.BoolFlag{
-		Flag: &option.Flag{
-			Name:  "app",
-			Usage: "enable app mode",
-		},
-		Value: false,
+	registerFlags := func(cmd *cobra.Command) error {
+		appFlag := &option.BoolFlag{
+			Flag: &option.Flag{
+				Name:  "app",
+				Usage: "enable app mode",
+			},
+			Value: false,
+		}
+
+		if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
+			return fmt.Errorf("failed  to register app flag: %w", err)
+		}
+		return nil
 	}
 
-	if err := option.RegisterBoolFlag(cmd, appFlag); err != nil {
+	if err := registerFlags(cmd); err != nil {
 		return nil, err
 	}
 

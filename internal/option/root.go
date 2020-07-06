@@ -1,6 +1,9 @@
 package option
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/spf13/viper"
 	"golang.org/x/xerrors"
 )
@@ -8,12 +11,16 @@ import (
 type CmdConfig struct {
 	Port    string
 	App     bool
+	Server  bool
 	Verbose bool
 }
 
 func NewRootCmdConfigFromViper() (*CmdConfig, error) {
 	rawConfig, err := newCmdRawConfig()
-	return newCmdConfigFromRawConfig(rawConfig), err
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse flags: %w", err)
+	}
+	return newRootCmdConfigFromRawConfig(rawConfig), err
 }
 
 func newCmdRawConfig() (*CmdRawConfig, error) {
@@ -28,11 +35,13 @@ func newCmdRawConfig() (*CmdRawConfig, error) {
 	return &conf, nil
 }
 
-func newCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
+func newRootCmdConfigFromRawConfig(rawConfig *CmdRawConfig) *CmdConfig {
+	fmt.Printf("new root cmd %#v\n", rawConfig)
 	return &CmdConfig{
 		Port:    rawConfig.Port,
 		App:     rawConfig.App,
 		Verbose: rawConfig.Verbose,
+		Server:  rawConfig.Server,
 	}
 }
 
@@ -41,5 +50,8 @@ type CmdRawConfig struct {
 }
 
 func (c *CmdRawConfig) validate() error {
+	if c.App && c.Server {
+		return errors.New("only one of --app and --server can be given")
+	}
 	return nil
 }

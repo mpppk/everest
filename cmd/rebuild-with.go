@@ -78,6 +78,19 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 			}
 
 			execPath := path.Join(dstPath, executableName)
+
+			if runtime.GOOS == "windows" {
+				appDstPath := "./everest.exe"
+				if appConfig != nil {
+					appDstPath = fmt.Sprintf("./%s.exe",appConfig.AppName)
+				}
+				if err := os.Rename(execPath, appDstPath); err != nil {
+					return fmt.Errorf("failed to move new executable from %s to %s: %w", execPath, appDstPath, err)
+				}
+				log.Printf("debug: move new binary from %s to %s\n", execPath, appDstPath)
+				return nil
+			}
+
 			if appConfig != nil {
 				switch runtime.GOOS {
 				case "darwin":
@@ -97,6 +110,7 @@ func newRebuildWithCmd(_fs afero.Fs) (*cobra.Command, error) {
 				if err := os.Rename(execPath, everestPath); err != nil {
 					return fmt.Errorf("failed to move new executable from %s to %s: %w", execPath, everestPath, err)
 				}
+				log.Printf("debug: move new binary from %s to %s\n", execPath, everestPath)
 			}
 
 			return nil
@@ -167,6 +181,10 @@ func rebuildEverest(embeddedPath, workDir, execPath string, appConfig *lib.AppCo
 			fmt.Sprintf("-X %s.width=%d", cmdPkgPath, appConfig.Width),
 			fmt.Sprintf("-X %s.height=%d", cmdPkgPath, appConfig.Height),
 		)
+
+		if runtime.GOOS == "windows" {
+			buildOption.LdFlags = append(buildOption.LdFlags, "-H windowsgui")
+		}
 	}
 
 	return lib.GoBuild(buildOption)

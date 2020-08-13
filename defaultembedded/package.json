@@ -9,7 +9,7 @@
     "@testing-library/user-event": "12.1.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-dropzone": "11.0.2",
+    "react-dropzone": "11.0.3",
     "react-scripts": "3.4.3",
     "zlibjs": "0.3.1"
   },

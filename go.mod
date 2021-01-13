@@ -9,7 +9,7 @@ require (
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/otiai10/copy v1.2.0
 	github.com/rakyll/statik v0.1.7
-	github.com/rhysd/go-github-selfupdate v1.2.2
+	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20200627165143-92b8a710ab6c
 	github.com/spf13/afero v1.3.1

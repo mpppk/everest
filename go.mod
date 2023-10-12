@@ -17,6 +17,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
 	github.com/zserge/lorca v0.1.9
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+	golang.org/x/xerrors 104605ab7028
 	gopkg.in/yaml.v2 v2.3.0
 )

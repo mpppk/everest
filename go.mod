@@ -12,7 +12,7 @@ require (
 	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20200627165143-92b8a710ab6c
-	github.com/spf13/afero v1.3.1
+	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
